@@ -18,13 +18,14 @@ sentence splitting loses context. Token-bounded keeps tables intact.
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from hashlib import sha256
-from typing import Iterator, Optional, Callable
+
 import logging
 import os
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass, field
+from hashlib import sha256
 
-from annix_intel.rag.sources import SOURCES, RawDocument
+from annix_intel.rag.sources import SOURCES
 
 log = logging.getLogger(__name__)
 
@@ -40,18 +41,18 @@ class ChunkRecord:
     source:     str
     doc_id:     str
     doc_title:  str
-    doc_url:    Optional[str]
+    doc_url:    str | None
     chunk_idx:  int
     text:       str
-    embedding:  Optional[list[float]] = field(default=None, repr=False)
+    embedding:  list[float] | None = field(default=None, repr=False)
     metadata:   dict = field(default_factory=dict)
 
 
 # ─── Public entry point ──────────────────────────────────────────────────────
 def build_corpus(
-    sources: Optional[list[str]] = None,
-    embedder: Optional[Callable[[list[str]], list[list[float]]]] = None,
-    store: Optional["VectorStore"] = None,
+    sources: list[str] | None = None,
+    embedder: Callable[[list[str]], list[list[float]]] | None = None,
+    store: VectorStore | None = None,
     chunk_tokens: int = DEFAULT_CHUNK_TOKENS,
     overlap_tokens: int = DEFAULT_OVERLAP_TOKENS,
     dry_run: bool = False,
@@ -87,7 +88,8 @@ def build_corpus(
 
     for name in src_names:
         if name not in SOURCES:
-            log.warning("Unknown source: %s", name); continue
+            log.warning("Unknown source: %s", name)
+            continue
         src = SOURCES[name]
         stats["sources"] += 1
         log.info("Processing source: %s", name)
@@ -164,7 +166,7 @@ def _chunk_id(doc_id: str, idx: int, text: str) -> str:
 def _embed_and_store(chunks: list[ChunkRecord], embedder, store) -> None:
     texts = [c.text for c in chunks]
     vectors = embedder(texts)
-    for c, v in zip(chunks, vectors):
+    for c, v in zip(chunks, vectors, strict=False):
         c.embedding = v
     store.upsert(chunks)
 
@@ -214,7 +216,7 @@ class _InMemoryStore(VectorStore):
         def cos(a, b):
             na = math.sqrt(sum(x*x for x in a)) or 1.0
             nb = math.sqrt(sum(x*x for x in b)) or 1.0
-            return sum(x*y for x, y in zip(a, b)) / (na * nb)
+            return sum(x*y for x, y in zip(a, b, strict=False)) / (na * nb)
         scored = [(cos(vector, c.embedding or [0]*len(vector)), c) for c in self.chunks]
         scored.sort(key=lambda t: t[0], reverse=True)
         return [c for _, c in scored[:k]]
@@ -226,7 +228,7 @@ def _default_store() -> VectorStore:
         return _InMemoryStore()
     try:
         from qdrant_client import QdrantClient
-        from qdrant_client.models import Distance, VectorParams, PointStruct
+        from qdrant_client.models import Distance, PointStruct, VectorParams
     except ImportError:
         log.warning("qdrant-client not installed — using in-memory store.")
         return _InMemoryStore()

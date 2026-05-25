@@ -10,9 +10,8 @@ Customers can override the mapping per project if their dataset uses oddball nam
 """
 
 from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional
-import pandas as pd
 
 try:
     import lasio
@@ -22,7 +21,6 @@ except ImportError as e:  # pragma: no cover
     ) from e
 
 from annix_intel.ingest.types import WellLog
-
 
 # Common curve aliases → canonical name. Extend as needed.
 CURVE_ALIASES: dict[str, str] = {
@@ -119,7 +117,7 @@ def read_las(
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
-def _to_float(v) -> Optional[float]:
+def _to_float(v) -> float | None:
     if v is None or v == "":
         return None
     try:

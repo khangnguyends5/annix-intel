@@ -30,12 +30,12 @@ Run
 """
 
 from __future__ import annotations
-from pathlib import Path
+
 import json
 import logging
 import sys
-from dataclasses import dataclass, asdict
-from typing import Optional
+from dataclasses import asdict, dataclass
+from pathlib import Path
 
 from annix_intel.rag.retrieve import search
 
@@ -47,7 +47,7 @@ class EvalCase:
     id: str
     question: str
     must_retrieve_any_of: list[str]
-    rationale: Optional[str] = None
+    rationale: str | None = None
 
 
 @dataclass
@@ -55,9 +55,9 @@ class CaseResult:
     id: str
     question: str
     passed: bool
-    matched_phrase: Optional[str] = None
+    matched_phrase: str | None = None
     top_titles: list[str] = None
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 def load_eval_file(path: str | Path) -> list[EvalCase]:

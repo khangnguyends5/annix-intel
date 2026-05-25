@@ -24,10 +24,11 @@ corpus builder calls fetch() then chunks, embeds, stores.
 """
 
 from __future__ import annotations
+
+import logging
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Iterator, Optional
-import logging
 
 log = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ class RawDocument:
     id:        str                       # unique within (source_name, document)
     title:     str
     text:      str                       # full plain text
-    url:       Optional[str] = None
+    url:       str | None = None
     authors:   list[str] = field(default_factory=list)
-    year:      Optional[int] = None
+    year:      int | None = None
     source:    str = ""                  # filled by the registry
     metadata:  dict = field(default_factory=dict)
 
@@ -102,8 +103,8 @@ def _fetch_folder(path: Path) -> Iterator[RawDocument]:
 
 def _pdf_to_text(path: Path) -> str:
     try:
-        import pymupdf                       # noqa: F401, fitz is the import name
         import fitz
+        import pymupdf  # noqa: F401, fitz is the import name
     except ImportError as e:
         raise RuntimeError(
             "PDF source requires pymupdf. Install: pip install pymupdf"

@@ -9,12 +9,12 @@ What the orchestrator calls before invoking Claude. Wraps:
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional
-import os
-import logging
 
-from annix_intel.rag.corpus import _default_embedder, _default_store, VectorStore
+import logging
+import os
+from dataclasses import dataclass
+
+from annix_intel.rag.corpus import VectorStore, _default_embedder, _default_store
 
 log = logging.getLogger(__name__)
 
@@ -24,8 +24,8 @@ class RetrievedPassage:
     text:      str
     source:    str
     doc_title: str
-    doc_url:   Optional[str]
-    score:     Optional[float] = None
+    doc_url:   str | None
+    score:     float | None = None
 
     def for_prompt(self) -> str:
         """Format ready to splice into a Claude system / user message."""
@@ -38,7 +38,7 @@ class RetrievedPassage:
 def search(
     question: str,
     k: int = 6,
-    store: Optional[VectorStore] = None,
+    store: VectorStore | None = None,
     embedder=None,
     rerank: bool = True,
 ) -> list[RetrievedPassage]:

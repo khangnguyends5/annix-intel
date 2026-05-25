@@ -16,9 +16,9 @@ Three layers:
                component, not magic.
 """
 
-from annix_intel.rag.sources  import SOURCES, register_source
-from annix_intel.rag.corpus   import build_corpus, ChunkRecord
-from annix_intel.rag.retrieve import search, RetrievedPassage
+from annix_intel.rag.corpus import ChunkRecord, build_corpus
+from annix_intel.rag.retrieve import RetrievedPassage, search
+from annix_intel.rag.sources import SOURCES, register_source
 
 __all__ = [
     "SOURCES", "register_source",

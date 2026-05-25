@@ -4,9 +4,11 @@ contract between ingestion and everything downstream (scoring, physics, LLM).
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field, asdict
-from typing import Optional, Any
+
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from typing import Any
+
 import pandas as pd
 
 
@@ -15,16 +17,16 @@ import pandas as pd
 class WellLog:
     """One well from any source (LAS file, AGS API, customer upload)."""
     uwi:          str                       # Unique Well Identifier
-    name:         Optional[str] = None
-    operator:     Optional[str] = None
-    location:     Optional[tuple[float, float]] = None   # (lon, lat) WGS84
-    kb_elev_m:    Optional[float] = None    # Kelly Bushing elevation
-    td_m:         Optional[float] = None    # Total Depth
-    spud_date:    Optional[datetime] = None
+    name:         str | None = None
+    operator:     str | None = None
+    location:     tuple[float, float] | None = None   # (lon, lat) WGS84
+    kb_elev_m:    float | None = None    # Kelly Bushing elevation
+    td_m:         float | None = None    # Total Depth
+    spud_date:    datetime | None = None
     formation_tops: dict[str, float] = field(default_factory=dict)
-    curves:       Optional[pd.DataFrame] = None   # index=DEPT, columns=GR,RHOB,...
+    curves:       pd.DataFrame | None = None   # index=DEPT, columns=GR,RHOB,...
     source:       str = "unknown"           # "LAS:filename", "AGS:UWI", "customer-upload"
-    raw:          Optional[dict[str, Any]] = field(default=None, repr=False)
+    raw:          dict[str, Any] | None = field(default=None, repr=False)
 
     def summary(self) -> dict:
         """JSON-safe summary for Claude / dossiers."""
@@ -48,17 +50,17 @@ class WellLog:
 class DepositRecord:
     """One point feature from a deposit index (SMDI, MRDS, etc.)."""
     id:                   str
-    name:                 Optional[str] = None
+    name:                 str | None = None
     primary_commodities:  list[str] = field(default_factory=list)
     associated_commodities: list[str] = field(default_factory=list)
-    status:               Optional[str] = None         # "mine", "deposit", "occurrence", ...
-    discovery_type:       Optional[str] = None
+    status:               str | None = None         # "mine", "deposit", "occurrence", ...
+    discovery_type:       str | None = None
     production:           bool = False
     reserves_defined:     bool = False
-    location:             Optional[tuple[float, float]] = None   # (x, y) in source CRS
+    location:             tuple[float, float] | None = None   # (x, y) in source CRS
     crs:                  str = "EPSG:4326"
-    weblink:              Optional[str] = None
-    host_mineral:         Optional[str] = None
+    weblink:              str | None = None
+    host_mineral:         str | None = None
     source:               str = "unknown"
 
     def summary(self) -> dict:
@@ -75,8 +77,8 @@ class GeologicLayer:
     """
     name:        str
     layer_type:  str                         # "formation_top" | "fault" | "raster"
-    description: Optional[str] = None
+    description: str | None = None
     crs:         str = "EPSG:4326"
-    features:    Optional[Any] = None        # GeoDataFrame or numpy array
+    features:    Any | None = None        # GeoDataFrame or numpy array
     metadata:    dict[str, Any] = field(default_factory=dict)
     source:      str = "unknown"

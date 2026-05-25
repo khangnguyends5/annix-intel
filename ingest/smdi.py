@@ -8,8 +8,9 @@ so downstream code (LLM tools, dossier builder) is data-source agnostic.
 """
 
 from __future__ import annotations
-from typing import Optional
+
 import logging
+
 import requests
 
 from annix_intel.ingest.types import DepositRecord
@@ -29,8 +30,8 @@ class SMDIError(RuntimeError):
 
 
 def fetch_smdi(
-    commodity: Optional[str] = None,
-    bbox_utm13: Optional[tuple[float, float, float, float]] = None,
+    commodity: str | None = None,
+    bbox_utm13: tuple[float, float, float, float] | None = None,
     max_records: int = 2000,
     out_sr: int = 2151,        # NAD83 / UTM Zone 13N — Sask standard
 ) -> list[DepositRecord]:
@@ -123,7 +124,8 @@ def _to_bool(v) -> bool:
 
 # ─── CLI / smoke ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    import sys, json
+    import json
+    import sys
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     commodity = sys.argv[1] if len(sys.argv) > 1 else "Lithium"
     records = fetch_smdi(commodity=commodity, max_records=50)

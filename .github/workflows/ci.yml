@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # GDAL system deps are needed for geopandas/fiona on Ubuntu.
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libgdal-dev gdal-bin
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev,rag,seismic]
+
+      - name: Lint with ruff
+        run: ruff check . --output-format=github
+
+      - name: Import smoke test
+        run: |
+          python -c "
+          import annix_intel
+          from annix_intel.ingest import (
+              WellLog, DepositRecord, GeologicLayer,
+              read_las, read_segy,
+              fetch_ags_mineral_occurrences, fetch_ags_bedrock_geology,
+              fetch_ags_faults, fetch_smdi,
+          )
+          from annix_intel.llm.tools import TOOL_DEFINITIONS, run_tool
+          from annix_intel.rag import SOURCES, build_corpus, search
+          print(f'OK: annix_intel v{annix_intel.__version__}')
+          print(f'  tools: {len(TOOL_DEFINITIONS)}')
+          print(f'  RAG sources: {len(SOURCES)}')
+          "
+
+      - name: Pytest
+        run: pytest -v tests/
+
+      - name: RAG eval (stub mode — empty corpus, smoke only)
+        run: python -m annix_intel.rag.eval rag_eval.yaml || true
+        # Empty-corpus eval always returns failures; CI logs them but doesn't
+        # fail the build. Once a real corpus is wired into CI, drop the `|| true`.

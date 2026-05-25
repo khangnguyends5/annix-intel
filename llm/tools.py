@@ -11,14 +11,20 @@ That's all — the orchestrator picks it up automatically.
 """
 
 from __future__ import annotations
-from typing import Any
+
 import logging
+from typing import Any
 
 from annix_intel.ingest import (
-    read_las,
-    fetch_smdi,
-    fetch_ags_wells,
+    fetch_ags_bedrock_geology,
+    fetch_ags_faults,
     fetch_ags_formation_tops,
+    fetch_ags_mineral_occurrences,
+    fetch_ags_wells,
+    fetch_smdi,
+    read_las,
+    read_segy,
+    segy_summary,
 )
 
 log = logging.getLogger(__name__)
@@ -105,9 +111,10 @@ TOOL_DEFINITIONS: list[dict] = [
     {
         "name": "fetch_ags_formation_layer",
         "description": (
-            "Fetch all AGS picks for one formation across a bounding box as a "
-            "spatial point layer (each point = one well's pick of that formation). "
-            "Use to build structure maps or check depth-to-top for the customer's claim block."
+            "Fetch AGS Geological Framework of Alberta polygons for the named "
+            "formation's areal extent (top surface). Returns coverage/extent, "
+            "not point picks. Use to check whether a target formation exists "
+            "laterally beneath the customer's claim block."
         ),
         "input_schema": {
             "type": "object",
@@ -122,6 +129,104 @@ TOOL_DEFINITIONS: list[dict] = [
                 "max_records": {"type": "integer", "default": 500},
             },
             "required": ["formation"],
+        },
+    },
+    {
+        "name": "fetch_ags_mineral_occurrences",
+        "description": (
+            "Query Alberta Geological Survey's Mineral Occurrences layer "
+            "(the AB analog to Saskatchewan's SMDI). 28 fields including "
+            "commodity, development stage, geological age/unit, and UWI for "
+            "drilled occurrences. Use for mineral exploration questions in Alberta."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "commodity": {
+                    "type": "string",
+                    "description": "Commodity name (Lithium, Uranium, Cobalt, Helium, Hydrogen, ...). Omit for all.",
+                },
+                "bbox": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "description": "[min_lon, min_lat, max_lon, max_lat] WGS84.",
+                },
+                "max_records": {"type": "integer", "default": 200},
+            },
+        },
+    },
+    {
+        "name": "fetch_ags_bedrock_geology",
+        "description": (
+            "Pull AGS Simplified Bedrock Geology (Map 600) polygons for the "
+            "given bbox. Use to characterise the geological context — host "
+            "rock, ages, contacts — beneath a claim block."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "bbox": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 4,
+                    "maxItems": 4,
+                },
+                "max_records": {"type": "integer", "default": 500},
+            },
+            "required": ["bbox"],
+        },
+    },
+    {
+        "name": "fetch_ags_faults",
+        "description": (
+            "Fault traces from AGS Cordilleran Deformation Belt (Map 542). "
+            "Note: this only covers the main thrust belt in western AB — not "
+            "all basement faults. Use to flag structural fluid pathways "
+            "intersecting a claim block."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "bbox": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 4,
+                    "maxItems": 4,
+                },
+                "max_records": {"type": "integer", "default": 500},
+            },
+            "required": ["bbox"],
+        },
+    },
+    {
+        "name": "read_segy_file",
+        "description": (
+            "Inspect a customer-supplied SEG-Y seismic file. Returns header + "
+            "survey geometry summary (trace count, sample interval, record "
+            "length, inline/crossline range, CDP bbox). Does NOT load trace "
+            "data — for actual interpretation hand off to OpendTect/Petrel. "
+            "Use when the user uploads a .segy/.sgy file."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Absolute or relative path to the SEG-Y file.",
+                },
+                "deep_scan": {
+                    "type": "boolean",
+                    "description": (
+                        "If true, scan all trace headers (slower, ~30s for 5GB) "
+                        "to compute accurate geometry. False (default) reads "
+                        "only the file header — fast and usually sufficient."
+                    ),
+                    "default": False,
+                },
+            },
+            "required": ["path"],
         },
     },
 ]
@@ -188,6 +293,50 @@ def run_tool(name: str, args: dict[str, Any]) -> dict:
                     gdf[["UWI", "PICK_DEPTH"]].head(10).to_dict("records")
                     if gdf is not None and len(gdf) else []
                 ),
+            }
+
+        if name == "fetch_ags_mineral_occurrences":
+            records = fetch_ags_mineral_occurrences(
+                commodity=args.get("commodity"),
+                bbox=tuple(args["bbox"]) if args.get("bbox") else None,
+                max_records=int(args.get("max_records", 200)),
+            )
+            return {
+                "ok": True,
+                "count": len(records),
+                "occurrences": [r.summary() for r in records[:50]],
+                "truncated": len(records) > 50,
+            }
+
+        if name == "fetch_ags_bedrock_geology":
+            layer = fetch_ags_bedrock_geology(
+                bbox=tuple(args["bbox"]),
+                max_records=int(args.get("max_records", 500)),
+            )
+            gdf = layer.features
+            return {
+                "ok": True,
+                "n_polygons": int(len(gdf)) if gdf is not None else 0,
+                "fields": list(gdf.columns) if gdf is not None else [],
+                "sample": (gdf.drop(columns="geometry").head(5).to_dict("records")
+                           if gdf is not None and len(gdf) else []),
+            }
+
+        if name == "read_segy_file":
+            layer = read_segy(args["path"], deep_scan=bool(args.get("deep_scan", False)))
+            return {"ok": True, "segy": segy_summary(layer)}
+
+        if name == "fetch_ags_faults":
+            layer = fetch_ags_faults(
+                bbox=tuple(args["bbox"]),
+                max_records=int(args.get("max_records", 500)),
+            )
+            gdf = layer.features
+            return {
+                "ok": True,
+                "n_features": int(len(gdf)) if gdf is not None else 0,
+                "sample": (gdf.drop(columns="geometry").head(5).to_dict("records")
+                           if gdf is not None and len(gdf) else []),
             }
 
         return {"ok": False, "error": f"Unknown tool: {name}"}

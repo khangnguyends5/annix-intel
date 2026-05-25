@@ -22,11 +22,11 @@ a stub response with the tool calls it *would* have made, useful for offline dev
 """
 
 from __future__ import annotations
-import os
+
 import json
 import logging
+import os
 from dataclasses import dataclass, field
-from typing import Optional
 
 from annix_intel.llm.tools import TOOL_DEFINITIONS, run_tool
 
@@ -65,9 +65,9 @@ class DossierResult:
 # ─── Main entry point ────────────────────────────────────────────────────────
 def evaluate_claim_block(
     question: str,
-    bbox: Optional[tuple[float, float, float, float]] = None,
-    commodity: Optional[str] = None,
-    rag_context: Optional[list[str]] = None,
+    bbox: tuple[float, float, float, float] | None = None,
+    commodity: str | None = None,
+    rag_context: list[str] | None = None,
     max_iters: int = 6,
     model: str = DEFAULT_MODEL,
 ) -> DossierResult:
@@ -102,8 +102,10 @@ def evaluate_claim_block(
 
     # ── Build the opening user message ──────────────────────────────────────
     user_payload = {"question": question}
-    if bbox:      user_payload["bbox_wgs84"] = list(bbox)
-    if commodity: user_payload["commodity"] = commodity
+    if bbox:
+        user_payload["bbox_wgs84"] = list(bbox)
+    if commodity:
+        user_payload["commodity"] = commodity
 
     user_msg = "GEOLOGICAL EVALUATION REQUEST\n" + json.dumps(user_payload, indent=2)
     if rag_context:
@@ -116,7 +118,7 @@ def evaluate_claim_block(
     tool_log:  list[dict] = []
     citations: list[str]  = []
 
-    for it in range(max_iters):
+    for _it in range(max_iters):
         resp = client.messages.create(
             model=model,
             max_tokens=4096,

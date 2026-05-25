@@ -23,18 +23,31 @@ Public connectors
 Each connector has a corresponding Claude tool definition in annix_intel.llm.tools.
 """
 
-from annix_intel.ingest.types import WellLog, DepositRecord, GeologicLayer
-from annix_intel.ingest.las  import read_las
-from annix_intel.ingest.ags  import (
-    fetch_ags_wells,
-    fetch_ags_formation_tops,
+from annix_intel.ingest.ags import (
     AGSError,
+    fetch_ags_bedrock_geology,
+    fetch_ags_faults,
+    fetch_ags_formation_extent,
+    fetch_ags_formation_tops,
+    fetch_ags_mineral_occurrences,
+    # Canonical AGS connectors
+    fetch_ags_oil_sands_wells,
+    # Back-compat shims (preserved for dossier.py)
+    fetch_ags_wells,
 )
-from annix_intel.ingest.smdi import fetch_smdi, SMDIError
+from annix_intel.ingest.las import read_las
+from annix_intel.ingest.segy import read_segy
+from annix_intel.ingest.segy import summarise_for_llm as segy_summary
+from annix_intel.ingest.smdi import SMDIError, fetch_smdi
+from annix_intel.ingest.types import DepositRecord, GeologicLayer, WellLog
 
 __all__ = [
     "WellLog", "DepositRecord", "GeologicLayer",
     "read_las",
-    "fetch_ags_wells", "fetch_ags_formation_tops", "AGSError",
+    "read_segy", "segy_summary",
+    "fetch_ags_oil_sands_wells", "fetch_ags_mineral_occurrences",
+    "fetch_ags_bedrock_geology", "fetch_ags_faults", "fetch_ags_formation_extent",
+    "fetch_ags_wells", "fetch_ags_formation_tops",
+    "AGSError",
     "fetch_smdi", "SMDIError",
 ]
