@@ -38,23 +38,8 @@ jobs:
           pip install "ruff==0.15.14" "pytest>=7"
           pip install -e ".[rag,seismic]"
 
-      - name: Diagnose ruff install
-        run: |
-          echo "=== pip show ruff ==="
-          python -m pip show ruff || echo "ruff NOT installed via pip"
-          echo
-          echo "=== python -m ruff --version ==="
-          python -m ruff --version || echo "python -m ruff failed (exit $?)"
-          echo
-          echo "=== which ruff / direct version ==="
-          which ruff || echo "ruff not on PATH"
-          ruff --version 2>&1 || echo "direct ruff invocation failed"
-          echo
-          echo "=== pyproject.toml ruff sections ==="
-          python -c "import tomllib; cfg=tomllib.loads(open('pyproject.toml','rb').read().decode()); print(cfg.get('tool',{}).get('ruff'))"
-
       - name: Lint with ruff
-        run: python -m ruff check . --output-format=concise
+        run: python -m ruff check . --output-format=github
 
       - name: Import smoke test
         run: |

@@ -66,3 +66,9 @@ ignore = [
     "E501",  # line length — handled by formatter
     "B008",  # function call in default arg (FastAPI Depends pattern)
 ]
+
+[tool.ruff.lint.isort]
+# Repo dir is `annix-intel` (hyphen) but the package is `annix_intel`
+# (underscore). Without this hint ruff treats annix_intel as third-party
+# and the import-block grouping in our own files reads as "unsorted".
+known-first-party = ["annix_intel"]
