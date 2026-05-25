@@ -33,10 +33,13 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev,rag,seismic]
+          # Pin ruff explicitly so a release that adds new default rules can't
+          # turn CI red overnight. Bump intentionally when you're ready.
+          pip install "ruff==0.15.14" "pytest>=7"
+          pip install -e ".[rag,seismic]"
 
       - name: Lint with ruff
-        run: ruff check . --output-format=github
+        run: python -m ruff check . --output-format=github
 
       - name: Import smoke test
         run: |
