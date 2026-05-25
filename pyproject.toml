@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "annix-intel"
+version = "0.1.0"
+description = "Shared intelligence layer for Annix Geo and Annix Geo H2 — ingestion, LLM orchestration, RAG over geological literature."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Annix" }]
+
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "geopandas>=0.14",
+    "shapely>=2.0",
+    "requests>=2.31",
+    "lasio>=0.31",
+    "pyproj>=3.6",
+    "pymupdf>=1.24",
+    "anthropic>=0.40",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+rag = [
+    "voyageai>=0.3",
+    "qdrant-client>=1.10",
+]
+seismic = [
+    "segyio>=1.9",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+
+# Flat layout — repo root is the package root.
+[tool.setuptools]
+packages = ["annix_intel", "annix_intel.ingest", "annix_intel.llm", "annix_intel.rag"]
+
+[tool.setuptools.package-dir]
+"annix_intel"        = "."
+"annix_intel.ingest" = "ingest"
+"annix_intel.llm"    = "llm"
+"annix_intel.rag"    = "rag"

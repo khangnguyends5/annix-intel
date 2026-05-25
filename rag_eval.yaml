@@ -1,0 +1,97 @@
+# RAG eval cases for annix_intel.
+#
+# Format: list of cases. Each case passes if any of the must_retrieve_any_of
+# substrings appears in the title or text of any top-k passage.
+#
+# Start with 10. Grow to 30+ before treating the corpus as production-ready.
+# Every customer dossier you ship should add 1-2 cases derived from that
+# customer's domain — that's how you keep the corpus honest.
+
+- id: duperow_seal_integrity
+  question: |
+    What is the seal integrity of the Devonian evaporite section above the
+    Duperow Formation in southeast Saskatchewan and southern Alberta?
+  must_retrieve_any_of:
+    - "Duperow"
+    - "Devonian evaporite"
+    - "AGS Bulletin"
+  rationale: "Core question for the Annix Geo H2 leak-classification use case."
+
+- id: natural_h2_serpentinization
+  question: |
+    Which basement lithologies are most associated with natural hydrogen
+    generation via serpentinization of ultramafic rocks?
+  must_retrieve_any_of:
+    - "serpentinization"
+    - "Bourakebougou"
+    - "Truche"
+  rationale: "Standard mechanism for deep H2 source rocks."
+
+- id: wcsb_leduc_reef_traps
+  question: |
+    Describe the structural-stratigraphic trap geometry of Leduc reefs in
+    the Western Canada Sedimentary Basin.
+  must_retrieve_any_of:
+    - "Leduc"
+    - "pinnacle reef"
+    - "Nisku"
+
+- id: athabasca_uranium_unconformity
+  question: |
+    What is the geological model for unconformity-related uranium deposits
+    in the Athabasca Basin?
+  must_retrieve_any_of:
+    - "Athabasca"
+    - "unconformity-related uranium"
+    - "McArthur River"
+
+- id: lithium_brine_devonian
+  question: |
+    Are there documented lithium-bearing brines hosted in Devonian carbonate
+    aquifers in western Canada?
+  must_retrieve_any_of:
+    - "lithium brine"
+    - "Leduc lithium"
+    - "Devonian brine"
+
+- id: groundwater_redox_signature
+  question: |
+    What dissolved species in groundwater indicate active sulfate reduction
+    driven by an upward H2 flux?
+  must_retrieve_any_of:
+    - "sulfate reduction"
+    - "HS-"
+    - "sulfide"
+    - "redox"
+
+- id: kansas_natural_h2
+  question: |
+    Summarise what is known about natural hydrogen occurrences in Kansas.
+  must_retrieve_any_of:
+    - "Kansas hydrogen"
+    - "Mid-Continent hydrogen"
+
+- id: mannville_aquifer_hydrochem
+  question: |
+    What is the typical background hydrochemistry of the Mannville Group
+    sandstone aquifer in Alberta?
+  must_retrieve_any_of:
+    - "Mannville"
+    - "Cretaceous aquifer"
+
+- id: helium_natural_h2_coassociation
+  question: |
+    How often does natural hydrogen co-occur with helium in continental
+    rift settings?
+  must_retrieve_any_of:
+    - "helium hydrogen"
+    - "natural gas helium"
+
+- id: precambrian_basement_h2
+  question: |
+    What is the role of Precambrian basement faults in conducting hydrogen
+    from depth to surface aquifers?
+  must_retrieve_any_of:
+    - "basement fault"
+    - "Precambrian"
+    - "fault conduit"

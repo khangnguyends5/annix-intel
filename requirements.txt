@@ -1,0 +1,23 @@
+# Core
+pandas>=2.0
+numpy>=1.24
+geopandas>=0.14
+shapely>=2.0
+requests>=2.31
+
+# Well-log + geospatial ingestion
+lasio>=0.31
+segyio>=1.9             # SEG-Y seismic — added when seismic connector lands
+fiona>=1.9
+pyproj>=3.6
+
+# PDF extraction for RAG
+pymupdf>=1.24
+
+# LLM + RAG
+anthropic>=0.40         # Claude
+voyageai>=0.3           # embeddings + reranker (optional, falls back to stub)
+qdrant-client>=1.10     # vector store (optional, falls back to in-memory)
+
+# Eval harness
+pyyaml>=6.0
