@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "annix-intel"
 version = "0.1.0"
-description = "Shared intelligence layer for Annix Geo and Annix Geo H2 — ingestion, LLM orchestration, RAG over geological literature."
+description = "Shared intelligence layer for the Annix Geo product family (Annix Geo H2, Annix Geo Minerals) — ingestion, LLM orchestration, RAG over geological literature."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Proprietary" }

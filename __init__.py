@@ -1,5 +1,6 @@
 """
-annix_intel — Shared intelligence layer for Annix Geo and Annix Geo H2.
+annix_intel — Shared intelligence layer for the Annix Geo product family
+(currently Annix Geo H2 and Annix Geo Minerals).
 
 Three subpackages:
 

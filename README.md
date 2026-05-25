@@ -1,6 +1,8 @@
 # annix_intel
 
-Shared intelligence layer for **Annix Geo** (minerals) and **Annix Geo H2**
+Shared intelligence layer for the **Annix Geo** product family — currently
+**Annix Geo Minerals** (Saskatchewan critical-mineral targeting) and
+**Annix Geo H2**
 (natural hydrogen). One ingestion pipeline, one Claude-orchestrated brain,
 one RAG corpus — used by both products.
 
@@ -165,8 +167,8 @@ The package is wired up; the corpus content is the work. Priority order:
   Set `QDRANT_URL`. The store swap is transparent — no code changes.
 - Move from stub embedder to Voyage-3. Set `VOYAGE_API_KEY`. Re-run
   `build_corpus()` — chunk IDs are stable so only embeddings get re-computed.
-- Wire `evaluate_claim_block()` into both Annix Geo and Annix Geo H2 as
-  the dossier generator.
+- Wire `evaluate_claim_block()` into both Annix Geo Minerals and Annix Geo H2
+  as the dossier generator.
 
 ## Environment variables
 
@@ -185,8 +187,8 @@ The package is wired up; the corpus content is the work. Priority order:
 the natural-language verdict + recommended sampling locations that go in the
 dossier. RAG context primes Claude with the relevant WCSB hydrogen literature.
 
-**Annix Geo** — replaces `04_llm_briefs.py` (Gemini/Groq) with
+**Annix Geo Minerals** — replaces `04_llm_briefs.py` (Gemini/Groq) with
 `evaluate_claim_block()`. The investor teasers become defensible briefs with
 real citations from AGS bulletins and USGS reports.
 
-Same package, two products. That's the point.
+Same package, two products under one **Annix Geo** brand. That's the point.

@@ -14,7 +14,7 @@ datasets are:
                               UWI, KB elevation, TD. No general WCSB well-picks
                               service — pull customer LAS files for that.
   - Mineral_Occurrences       28 fields, point features, all commodities.
-                              The richest layer for Annix Geo mineral work.
+                              The richest layer for Annix Geo Minerals work.
   - Bedrock geology + faults  Polygons + line features for context.
   - Geological Framework of Alberta — per-formation "Areal Extent (Top/Base)"
     polygon services, naming pattern `ET<code>` / `EB<code>`. Looking up a

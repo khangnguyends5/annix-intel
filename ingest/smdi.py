@@ -1,7 +1,8 @@
 """
 Saskatchewan Mineral Deposits Index (SMDI) connector — canonical-type wrapper
-around the existing `annix geo/01_ingestion.py` logic, so both Annix Geo and
-Annix Geo H2 can use the same fetch path through annix_intel.
+around the existing `annix_geo_minerals/01_ingestion.py` logic, so both
+Annix Geo Minerals and Annix Geo H2 can use the same fetch path through
+annix_intel.
 
 The legacy module returns a pandas DataFrame; we normalise into DepositRecord
 so downstream code (LLM tools, dossier builder) is data-source agnostic.
